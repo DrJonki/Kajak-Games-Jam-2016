@@ -14,45 +14,78 @@ public:
         : jop::Scene("MyScene"),
         m_object()
     {
-        createChild("cam")->createComponent<jop::Camera>(getRenderer(), jop::Camera::Projection::Perspective);
+		using namespace jop;
+		typedef ResourceManager rm;
+        createChild("cam")->createComponent<jop::Camera>(getRenderer(), jop::Camera::Projection::Orthographic);
+		auto cam = findChild("cam")->getComponent<jop::Camera>();
+		cam->setSize(cam->getSize()*10.f);
 
-        m_object = createChild("box");
-        m_object->createComponent<jop::Drawable>(getRenderer());
-        m_object->setPosition(0.f, 0.f, -2.5f);
+		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f)).setTexture(rm::get<Texture2D>("car.jpg"),false);	
+	}
 
-        // Create an object with a directional light .
-        auto light = createChild("light");
-        light->createComponent<jop::LightSource>(getRenderer(), jop::LightSource::Type::Directional);
+	void HandleKey(const int key){
+		switch (key)
+		{
+			case jop::Keyboard::Up:
+			{
+				
+			}
+		}
+	}
 
-        // Move the light to the right and set it to point to the left
-        // Notice that the rotation is expected to be in radians.
-        light->setPosition(5.f, 0.f, 0.f).setRotation(0.f, glm::radians(90.f) /* same as glm::half_pi<float>() */, 0.f);
-
-        auto drawable = m_object->getComponent<jop::Drawable>();
-
-        // To modify the drawable's material, we must create a new one to replace the default.
-        auto& newMaterial = jop::ResourceManager::getEmpty<jop::Material>("newMaterial");
-        drawable->setMaterial(newMaterial);
-
-        // Set the lighting model to use. By default a material will have no lighting.
-        newMaterial.setLightingModel(jop::Material::LightingModel::Default);
-
-        // Let's add the default texture for good measure.
-        newMaterial.setMap(jop::Material::Map::Diffuse0, jop::Texture2D::getDefault());
-
-        // Set the diffuse reflection.
-        newMaterial.setReflection(jop::Material::Reflection::Diffuse, jop::Color::White);
-    }
+	void zoomCamera(float deltaZoom)
+	{
+		auto cam = findChild("cam")->getComponent<jop::Camera>();
+		auto camSize = cam->getSize();
+		if ((camSize.x < 50 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
+			cam->setSize(camSize + glm::vec2(deltaZoom, deltaZoom/(camSize.x/camSize.y)));
+	}
 
     void preUpdate(const float deltaTime) override
     {
-        m_object->rotate(0.5f * deltaTime, 1.f * deltaTime, 0.f);
+		auto carObj = findChild("car");
+
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::Up))
+		{
+			carObj->move(0, deltaTime, 0);
+		}
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::Down))
+		{
+			carObj->move(0, -deltaTime, 0);
+		}
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::Left))
+		{
+			carObj->move(-deltaTime, 0, 0);
+		}
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::Right))
+		{
+			carObj->move(deltaTime, 0, 0);
+		}
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::KeypadAdd))
+		{
+			zoomCamera(-1.f);
+		}
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::KeypadSubtract))
+		{
+			zoomCamera(1.f);
+		}
     }
+};
+
+class EventHandler :public jop::WindowEventHandler{
+	EventHandler(jop::Window &w) :jop::WindowEventHandler(w)
+	{}
+		void keyPressed(const int key, const int, const int) override
+		{
+			auto &scene = jop::Engine::getCurrentScene();
+			static_cast <MyScene&>(scene).HandleKey(key);
+		}
+	
 };
 
 int main(int argc, char* argv[])
 {
-    JOP_ENGINE_INIT("spinning_box_with_light_example", argc, argv);
+    JOP_ENGINE_INIT("Skit Cirkel", argc, argv);
 
     jop::Engine::createScene<MyScene>();
 
