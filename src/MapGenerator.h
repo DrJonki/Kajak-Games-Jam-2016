@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Jopnal/Jopnal.hpp>
-#include "MapTile.h"
-#include <Jopnal/Jopnal.hpp>
 
 class MapGenerator
 {
