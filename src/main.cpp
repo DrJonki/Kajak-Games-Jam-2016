@@ -1,6 +1,7 @@
 // For info on the uncommented lines, see the spinning_box example
 
 #include <Jopnal/Jopnal.hpp>
+#include "MapGenerator.h"
 
 class MyScene : public jop::Scene
 {
@@ -21,6 +22,8 @@ public:
 		cam->setSize(cam->getSize()*10.f);
 
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f)).setTexture(rm::get<Texture2D>("car.jpg"),false);	
+
+		MapGenerator map = MapGenerator(*this);
 	}
 
 	void HandleKey(const int key){
