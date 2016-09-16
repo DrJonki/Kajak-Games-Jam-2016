@@ -128,6 +128,7 @@ public:
 
 		//carObj->applyCentralForce(slideAccelerator()*deltaTime);
 		
+		findChild("cam")->setPosition(carObj->getObject()->getGlobalPosition());
 
     }
 };
