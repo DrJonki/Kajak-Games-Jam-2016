@@ -10,7 +10,7 @@ private:
 	std::vector<std::vector<glm::vec2>> map;
 	glm::vec2 tile;
 	float tileSize = 4.f;
-	int mapSize = 50;
+	int mapSize = 10;
 
 	void createTiles(jop::Scene &scene, std::vector<std::vector<glm::vec2>> map)
 	{
