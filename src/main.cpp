@@ -2,6 +2,7 @@
 
 #include <Jopnal/Jopnal.hpp>
 #include "MapGenerator.h"
+#include "SpawnManager.hpp"
 
 class MyScene : public jop::Scene
 {
@@ -25,12 +26,14 @@ public:
 			setTexture(rm::get<Texture2D>("car.jpg"),false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
-		MapGenerator map = MapGenerator(*this);
+		//MapGenerator map = MapGenerator(*this);
 		getWorld<2>().setGravity(glm::vec2());
 		getWorld<2>().setDebugMode(true);
 
 
 		createChild("debugDot")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(0.1f));
+
+        createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
 	}
 
 	void HandleKey(const int key){
