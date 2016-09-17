@@ -24,8 +24,10 @@ public:
 		cam->setSize(cam->getSize()*10.f);
         cam->setClippingPlanes(-26.f, 1.f);
 
+        createChild("ground")->move(0.f, 0.f, -0.2f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<CircleMesh>("asfiohaf", 10.f, 30), rm::getEmpty<Material>("asdadaafg").setLightingModel(Material::LightingModel::BlinnPhong));
+
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.jpg"),false).
+			setTexture(rm::get<Texture2D>("car.png"), false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
 		//MapGenerator map = MapGenerator(*this);
