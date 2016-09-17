@@ -252,7 +252,6 @@ class EventHandler :public jop::WindowEventHandler{
 int main(int argc, char* argv[])
 {
     jop::SettingManager::setDefaultDirectory("defconf");
-    jop::SettingManager::setOverrideWithDefaults();
 
     JOP_ENGINE_INIT("Skit Cirkel", argc, argv);
 

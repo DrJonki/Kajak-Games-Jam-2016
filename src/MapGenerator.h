@@ -14,81 +14,6 @@ private:
 	int minRoadRange = 4;
 	int maxRoadRange = 4;
 
-	void createTiles(jop::Scene &scene, std::vector<std::vector<glm::vec2>> map)
-	{
-		using namespace jop;
-		typedef ResourceManager rm;
-		auto vertiCalCenter = map[map.size() / 2];
-		auto centerTile = vertiCalCenter[vertiCalCenter.size() / 2];
-
-		for (int i = 0; i < map.size(); i++)
-		{
-			for (int j = 0; j < map[i].size(); j++) 
-			{
-				scene.createChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->createComponent<Sprite>(scene.getRenderer()).setSize(glm::vec2(tileSize)).setTexture(rm::get<Texture2D>("car.jpg"), false);
-				scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->setPosition(map[i][j].x, map[i][j].y, -0.1f).addTag("tile");
-				if (map[i][j].x == centerTile.x || map[i][j].y == centerTile.y)
-				{
-
-					scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->addTag("road");
-					scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->getComponent<Sprite>()->setTexture(rm::get<Texture2D>("road.png"), false);
-				}
-			}
-		}
-
-	}
-
-	void createWallCollisions(jop::Scene &scene, std::vector<std::vector<glm::vec2>> map)
-	{
-		using namespace jop;
-		typedef ResourceManager rm;
-		auto tiles = scene.findChildrenWithTag("tile", false);
-		auto vertexPositions = getPositions(tiles);
-
-		for (int i = 0; i < vertexPositions.size(); i++)
-		{
-			tiles[i]->createComponent<RigidBody2D>(scene.getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("house", tileSize*0.9f, tileSize*0.9f), RigidBody::Type::Static, 1.f));
-		}
-	}
-
-	std::vector<std::vector<glm::vec2>> getPositions(std::vector<jop::WeakReference<jop::Object>> &tileObjects)
-	{
-		using namespace jop;
-		std::vector<std::vector<glm::vec2>> tempVector;
-		for (int i = 0; i < tileObjects.size(); i++)
-		{
-			if (!tileObjects[i]->hasTag("house"))
-			{
-				glm::vec2 countedSize = glm::vec2(0);
-				for (int j = i; j < mapSize; j++)
-				{
-					if (tileObjects[j]->hasTag("road") && countedSize.x < 0)
-					{
-						countedSize.x = j;
-					}
-				}
-				for (int k = i; k < mapSize; k++)
-				{
-					if (tileObjects[k + mapSize]->hasTag("road") && countedSize.y < 0)
-					{
-						countedSize.y = k;
-					}
-				}
-				tempVector.push_back(getSingleHousePositions(tileObjects, countedSize, i));
-			}
-		}
-		return tempVector;
-	}
-
-	// Tags tiles to "houses" for single big house.
-	std::vector<glm::vec2> getSingleHousePositions(std::vector<jop::WeakReference<jop::Object>> &tileObjects, glm::vec2 houseSize, int offset)
-	{
-		for (int i = offset; i < tileObjects.size(); i++)
-		{
-
-		}
-	}
-
 	std::vector<std::vector<int>> getRandomRoads()
 	{
 		using namespace jop;
@@ -184,7 +109,7 @@ private:
 					{
 						for (int c = 0; c <= tileCountY; c++)
 						{
-							if (c <= tileCountY)
+							if (c < tileCountY)
 							{
 								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
 								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
@@ -204,7 +129,7 @@ private:
 								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-tileCountY * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.second.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
 								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-tileCountY * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
 							}
-							if (k <= tileCountX)
+							if (k < tileCountX)
 							{
 								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x, (-(c) * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.first.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
 								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x, (-(c) * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
@@ -273,15 +198,10 @@ public:
 				mapString.append(std::to_string(tempVec[i]) + " ");
 			}
 			JOP_DEBUG_INFO(mapString);
-						
-			//tempVec.push_back(glm::vec2(j * tileSize + startPos.x, -i * tileSize + startPos.y));
-			//map.push_back(tempVec);
 
 		}
 
 		createHouses(tempVecVec, scene);
-		//createTiles(scene, map);
-		//createWallCollisions(scene, map);
 	}
 };
 
