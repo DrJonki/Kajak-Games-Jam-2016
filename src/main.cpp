@@ -10,7 +10,7 @@ private:
     jop::WeakReference<jop::Object> m_object;
 
 public:
-
+	float steeringAngle = 0.0f;
     MyScene()
         : jop::Scene("MyScene"),
         m_object()
@@ -47,24 +47,35 @@ public:
 	{
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		auto camSize = cam->getSize();
-		if ((camSize.x < 50 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
+		if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
 			cam->setSize(camSize + glm::vec2(deltaZoom, deltaZoom/(camSize.x/camSize.y)));
 	}
 
-	glm::vec2 slideAccelerator()
+	//glm::vec2 slideAccelerator()
+	//{
+	//	auto carObj = findChild("car")->getComponent<jop::RigidBody2D>();
+	//	glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
+	//	static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
+	//	glm::vec2 speedDirection = carObj->getLinearVelocity();
+	//	float angleBetween = glm::dot(glm::normalize(driveDirection), glm::normalize(speedDirection));
+
+	//	//(driveDirection.x << ", " << driveDirection.y);
+	//	//JOP_DEBUG_DIAG(speedDirection.x << ", " << speedDirection.y);
+	//	JOP_DEBUG_DIAG(angleBetween);
+
+	//	return speedDirection; // -linearFriction*sin(angleBetween)*speedDirection;
+	//	
+	//}
+
+	float accelBoost(jop::RigidBody2D &car)
 	{
-		auto carObj = findChild("car")->getComponent<jop::RigidBody2D>();
-		glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
-		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
-		glm::vec2 speedDirection = carObj->getLinearVelocity();
-		float angleBetween = glm::dot(glm::normalize(driveDirection), glm::normalize(speedDirection));
-
-		//(driveDirection.x << ", " << driveDirection.y);
-		//JOP_DEBUG_DIAG(speedDirection.x << ", " << speedDirection.y);
-		JOP_DEBUG_DIAG(angleBetween);
-
-		return speedDirection; // -linearFriction*sin(angleBetween)*speedDirection;
-		
+		float boost = 0;
+		float currentSpeed = glm::length(car.getLinearVelocity());
+		if (currentSpeed > 10)
+		{
+			boost = (currentSpeed - 10.f)*(currentSpeed - 10.f);
+		}
+		return boost;
 	}
 
     void preUpdate(const float deltaTime) override
@@ -77,8 +88,13 @@ public:
 		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 10.f);
 		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 200.f);
 		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
-
+		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 200.f);
+		static jop::DynamicSetting<float> driveControl("game@driveControl", 10.f);
+		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 0.5f);
 		
+
+		float angleBetweenVeloAndDir = acos(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? carObj->getLinearVelocity() : glm::vec2(0, 1))));
+
 
 		float angularVelo = carObj->getAngularVelocity();
 		if (angularVelo > 0.04)
@@ -94,24 +110,52 @@ public:
 			carObj->setAngularVelocity(0);
 		}
 
-		//JOP_DEBUG_DIAG(glm::length(carObj->getLinearVelocity()));
+		JOP_DEBUG_DIAG(glm::length(carObj->getLinearVelocity()));
 
 		findChild("debugDot")->setPosition(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f));
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Up))
 		{
-			carObj->applyForce(rearAcceleration.value*glm::normalize(driveDirection)*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition()-glm::vec3(driveDirection, 0.f)));
+			//rearPower
+			carObj->applyForce((rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition()-glm::vec3(driveDirection, 0.f)));
+			//frontPower
+			carObj->applyForce((rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Down))
 		{
-			carObj->applyCentralForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime);
+			//back brake
+			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
+			//front brake
+			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
 		}
+
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::LControl))
+		{
+			//back brake
+			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
+		}
+
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::LAlt))
+		{
+			//front brake
+			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
+		}
+
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Left))
 		{
-			carObj->applyTorque(rotateTorgue);
+			if (glm::length(carObj->getLinearVelocity()) > 3)
+			{
+				carObj->applyTorque(rotateTorgue);
+			}
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Right))
 		{
-			carObj->applyTorque(-rotateTorgue);
+			if (glm::length(carObj->getLinearVelocity()) > 3)
+			{
+				carObj->applyTorque(-rotateTorgue);
+			}
+			
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::KeypadAdd))
 		{
@@ -122,13 +166,50 @@ public:
 			zoomCamera(1.f);
 		}
 
+
 		// sliding makes car go slower
 
-		slideAccelerator();
+		//slideAccelerator();
 
 		//carObj->applyCentralForce(slideAccelerator()*deltaTime);
 		
+		///////////////////////////////////////////////////////////////////////////////////////////////// friction /////////////////////////////////
 
+		
+
+		//JOP_DEBUG_DIAG(glm::length(angleBetweenVeloAndDir));
+
+		if (angleBetweenVeloAndDir>0)
+		{
+			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
+
+			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
+
+			//JOP_DEBUG_DIAG(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? glm::vec2(-carObj->getLinearVelocity().y, carObj->getLinearVelocity().x) : glm::vec2(0, 1))));
+			
+		//driveControl	
+			float lol = glm::dot(glm::normalize(glm::length(driveDirection) > 0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity()) > 0 ? glm::vec2(-carObj->getLinearVelocity().y, carObj->getLinearVelocity().x) : glm::vec2(0, 1)));
+			
+			if (glm::length(carObj->getLinearVelocity()) > driveControlActivationSpeed.value)
+			{
+				if (lol > 0)
+				{
+					if (!jop::Keyboard::isKeyDown(jop::Keyboard::Right) && !jop::Keyboard::isKeyDown(jop::Keyboard::Left) && abs(lol) > 0.15)
+					{
+						carObj->applyTorque(-driveControl.value);
+					}
+				}
+				else
+				{
+					if (!jop::Keyboard::isKeyDown(jop::Keyboard::Right) && !jop::Keyboard::isKeyDown(jop::Keyboard::Left) && abs(lol) > 0.15)
+					{
+						carObj->applyTorque(driveControl.value);
+					}
+				}
+			}
+		}
     }
 };
 
