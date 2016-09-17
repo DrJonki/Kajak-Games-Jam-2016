@@ -25,7 +25,6 @@ private:
 		{
 			for (int j = 0; j < map[i].size(); j++) 
 			{
-
 				scene.createChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->createComponent<Sprite>(scene.getRenderer()).setSize(glm::vec2(tileSize)).setTexture(rm::get<Texture2D>("car.jpg"), false);
 				scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->setPosition(map[i][j].x, map[i][j].y, -0.1f).addTag("tile");
 				if (map[i][j].x == centerTile.x || map[i][j].y == centerTile.y)

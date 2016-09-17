@@ -1,0 +1,28 @@
+{
+    "Physics2D": {
+        "uUpdateFrequency": 60
+    },
+    "Graphics": {
+        "Texture": {
+            "bAllowCompression": false
+        },
+        "Postprocessor": {
+            "Tonemapping": {
+                "fExposure": 1.0,
+                "bEnabled": false
+            },
+            "GammaCorrection": {
+                "fGamma": 2.200000047683716,
+                "bEnabled": false
+            },
+            "Bloom": {
+                "fThreshold": 2.0,
+                "fSubThresholdExponent": 4.0,
+                "bEnabled": false
+            },
+            "Dithering": {
+                "bEnabled": false
+            }
+        }
+    }
+}
