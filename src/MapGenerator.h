@@ -16,9 +16,9 @@ private:
 	{
 		using namespace jop;
 		typedef ResourceManager rm;
-		for (int i = 0; i < map.size(); i++)
+		for (unsigned int i = 0; i < map.size(); i++)
 		{
-			for (int j = 0; j < map[i].size(); j++) 
+			for (unsigned int j = 0; j < map[i].size(); j++) 
 			{
 				scene.createChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->createComponent<Sprite>(scene.getRenderer()).setSize(glm::vec2(tileSize)).setTexture(rm::get<Texture2D>("car.jpg"), false);
 				scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->setPosition(map[i][j].x, map[i][j].y, -0.1f).addTag("house");
@@ -32,9 +32,9 @@ private:
 		typedef ResourceManager rm;
 		auto vertiCalCenter = map[map.size() / 2];
 		auto centerTile = vertiCalCenter[vertiCalCenter.size() / 2];
-		for (int i = 0; i < map.size(); i++)
+		for (unsigned int i = 0; i < map.size(); i++)
 		{
-			for (int j = 0; j < map[i].size(); j++)
+			for (unsigned int j = 0; j < map[i].size(); j++)
 			{
 				if (map[i][j].x == centerTile.x || map[i][j].y == centerTile.y)
 				{
