@@ -6,6 +6,11 @@
         "Texture": {
             "bAllowCompression": false
         },
+        "Shading": { 
+            "Material": {
+                "sDefaultAmbient": "888888FF"
+            }
+        },
         "Postprocessor": {
             "Tonemapping": {
                 "fExposure": 1.0,

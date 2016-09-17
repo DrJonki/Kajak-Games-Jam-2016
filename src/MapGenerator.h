@@ -49,7 +49,7 @@ private:
 		auto m_atlas = &rm::getNamed<jop::TextureAtlas>("houseBlocks", glm::uvec2(4096));
 		
 		auto roadTexture = m_atlas->addTexture("road.png");
-		auto houseTexture = m_atlas->addTexture("car.png");
+		auto houseTexture = m_atlas->addTexture("roof.png");
 
 		auto roadIndex = m_atlas->getCoordinates(roadTexture);
 		auto houseIndex = m_atlas->getCoordinates(houseTexture);
@@ -158,7 +158,7 @@ private:
 		}
 		auto &houseMesh = rm::getNamed<jop::Mesh>("houseBlock", vertices, std::vector<unsigned>());
 		mapObjects->setPosition(0, 0, -0.5f);
-		mapObjects->createComponent<jop::Drawable>(scene.getRenderer()).setMesh(houseMesh).setMaterial(rm::getEmpty<jop::Material>("houseMaterial").setMap(jop::Material::Map::Diffuse0, m_atlas->getTexture()));
+		mapObjects->createComponent<jop::Drawable>(scene.getRenderer()).setMesh(houseMesh).setMaterial(rm::getEmpty<jop::Material>("houseMaterial").setMap(jop::Material::Map::Diffuse0, m_atlas->getTexture()).setLightingModel(Material::LightingModel::BlinnPhong));
 	}
 
 public:

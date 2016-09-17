@@ -34,7 +34,7 @@ public:
                 auto& mat = RM::getEmpty<Material>("helo_mat");
                 mat.setMap(Material::Map::Diffuse0, RM::get<Texture2D>("helo.png"));
                 mat.setLightingModel(Material::LightingModel::BlinnPhong);
-                mat.setReflection(Material::Reflection::Ambient, Color::White * 0.75f);
+                mat.setReflection(Material::Reflection::Ambient, Color::White * 1.25f);
 
                 setModel(RM::getNamed<RectangleMesh>("helo_mesh", glm::vec2(1.f, 3.5f)), mat);
             }
@@ -44,7 +44,7 @@ public:
                 auto& mat = RM::getEmpty<Material>("helo_rotor_mat");
                 mat.setMap(Material::Map::Diffuse0, RM::get<Texture2D>("rotor.png"));
                 mat.setLightingModel(Material::LightingModel::BlinnPhong);
-                mat.setReflection(Material::Reflection::Ambient, Color::White * 0.75f);
+                mat.setReflection(Material::Reflection::Ambient, Color::White * 1.25f);
 
                 auto& d = m_rotor->move(0.f, 0.6f, -0.5f).createComponent<Drawable>(rend);
 
@@ -58,10 +58,9 @@ public:
             m_light->setIgnoreTransform(Object::TransformRestriction::Rotation);
 
             auto& light = m_light->createComponent<LightSource>(rend, LightSource::Type::Spot);
-            light.setCutoff(glm::radians(2.5f), glm::radians(3.f));
+            light.setCutoff(glm::radians(3.5f), glm::radians(4.5f));
             light.setAttenuation(25.f);
-            light.setIntensity(LightSource::Intensity::Diffuse, Color::White * 10.f);
-            light.setIntensity(LightSource::Intensity::Ambient, Color::White);
+            light.setIntensity(LightSource::Intensity::Diffuse, Color::White * 25.f);
         }
     }
 

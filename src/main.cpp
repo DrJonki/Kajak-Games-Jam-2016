@@ -25,21 +25,14 @@ public:
 		cam->setSize(cam->getSize()*10.f);
         cam->setClippingPlanes(-26.f, 1.f);
 
-        createChild("ground")->move(0.f, 0.f, -0.2f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<CircleMesh>("asfiohaf", 10.f, 30), rm::getEmpty<Material>("asdadaafg").setLightingModel(Material::LightingModel::BlinnPhong));
-
-		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.png"), false).
+		createChild("car")->createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
 		MapGenerator map = MapGenerator(*this);
 		getWorld<2>().setGravity(glm::vec2());
-		//getWorld<2>().setDebugMode(true);
+		getWorld<2>().setDebugMode(true);
 
-
-		// Debug camera mode
-		auto camSize = cam->getSize();
-		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
-
+        createComponent<LightSource>(getRenderer(), LightSource::Type::Directional).setIntensity(Color::Gray, Color::Black, Color::Black);
 
         createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
         createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
