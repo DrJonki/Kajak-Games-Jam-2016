@@ -2,6 +2,8 @@
 
 #include <Jopnal/Jopnal.hpp>
 #include "MapGenerator.h"
+#include "SpawnManager.hpp"
+#include "Helo.hpp"
 
 class MyScene : public jop::Scene
 {
@@ -21,9 +23,12 @@ public:
         createChild("cam")->createComponent<jop::Camera>(getRenderer(), jop::Camera::Projection::Orthographic);
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		cam->setSize(cam->getSize()*10.f);
+        cam->setClippingPlanes(-26.f, 1.f);
+
+        createChild("ground")->move(0.f, 0.f, -0.2f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<CircleMesh>("asfiohaf", 10.f, 30), rm::getEmpty<Material>("asdadaafg").setLightingModel(Material::LightingModel::BlinnPhong));
 
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.jpg"),false).
+			setTexture(rm::get<Texture2D>("car.png"), false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
 		MapGenerator map = MapGenerator(*this);
@@ -31,7 +36,13 @@ public:
 		getWorld<2>().setDebugMode(true);
 
 
-		createChild("debugDot")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(0.1f));
+		// Debug camera mode
+		auto camSize = cam->getSize();
+		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
+
+
+        createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
+        createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
 	void HandleKey(const int key){
@@ -62,7 +73,7 @@ public:
 
 	//	//(driveDirection.x << ", " << driveDirection.y);
 	//	//JOP_DEBUG_DIAG(speedDirection.x << ", " << speedDirection.y);
-	//	JOP_DEBUG_DIAG(angleBetween);
+		//JOP_DEBUG_DIAG(angleBetween);
 
 	//	return speedDirection; // -linearFriction*sin(angleBetween)*speedDirection;
 	//	
@@ -114,7 +125,7 @@ public:
 
 		JOP_DEBUG_DIAG(glm::length(carObj->getLinearVelocity()));
 
-		findChild("debugDot")->setPosition(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f));
+		//findChild("debugDot")->setPosition(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f));
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Up))
 		{
 			//rearPower
@@ -177,11 +188,11 @@ public:
 		//carObj->applyCentralForce(slideAccelerator()*deltaTime);
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////// friction /////////////////////////////////
+		findChild("cam")->setPosition(carObj->getObject()->getGlobalPosition());
 
 		
 
 		//JOP_DEBUG_DIAG(glm::length(angleBetweenVeloAndDir));
-
 
 		if (angleBetweenVeloAndDir > 0.07)
 		{
@@ -240,6 +251,9 @@ class EventHandler :public jop::WindowEventHandler{
 
 int main(int argc, char* argv[])
 {
+    jop::SettingManager::setDefaultDirectory("defconf");
+    jop::SettingManager::setOverrideWithDefaults();
+
     JOP_ENGINE_INIT("Skit Cirkel", argc, argv);
 
     jop::Engine::createScene<MyScene>();
