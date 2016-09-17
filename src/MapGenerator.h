@@ -25,7 +25,6 @@ private:
 		{
 			for (int j = 0; j < map[i].size(); j++) 
 			{
-
 				scene.createChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->createComponent<Sprite>(scene.getRenderer()).setSize(glm::vec2(tileSize)).setTexture(rm::get<Texture2D>("car.jpg"), false);
 				scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->setPosition(map[i][j].x, map[i][j].y, -0.1f).addTag("tile");
 				if (map[i][j].x == centerTile.x || map[i][j].y == centerTile.y)
@@ -123,8 +122,12 @@ private:
 		typedef ResourceManager rm;
 		int houseCount = 0;
 		auto m_atlas = &rm::getNamed<jop::TextureAtlas>("houseBlocks", glm::uvec2(4096));
-		auto roadIndex = m_atlas->getCoordinates(m_atlas->addTexture("road.png"));
-		auto houseIndex = m_atlas->getCoordinates(m_atlas->addTexture("car.png"));
+		
+		auto roadTexture = m_atlas->addTexture("road.png");
+		auto houseTexture = m_atlas->addTexture("car.png");
+
+		auto roadIndex = m_atlas->getCoordinates(roadTexture);
+		auto houseIndex = m_atlas->getCoordinates(houseTexture);
 
 		std::vector<jop::Vertex> vertices;
 
@@ -179,29 +182,44 @@ private:
 					// Create vertex for single X tiles
 					for (int k = 0; k < tileCountX; k++)
 					{
-						for (int c = 0; c < tileCountY; c++)
+						for (int c = 0; c <= tileCountY; c++)
 						{
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+							if (c <= tileCountY)
+							{
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
 
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-							vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+							}
+							else
+							{
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-tileCountY * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.first.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-tileCountY * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-tileCountY * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.second.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-tileCountY * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.second.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-tileCountY * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.second.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-tileCountY * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+							}
+							if (k <= tileCountX)
+							{
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x, (-(c) * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.first.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x, (-(c) * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x + tileSize, (-(c) * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.second.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x + tileSize, (-(c) * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.second.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x + tileSize, (-(c) * tileSize) + housePosition.y, 0.f), glm::vec2(roadIndex.second.x, roadIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((tileCountX * tileSize) + housePosition.x, (-(c) * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(roadIndex.first.x, roadIndex.second.y), glm::vec3(0, 0, 1)));
+							}
 						}
 					}
 					JOP_DEBUG_INFO("#### House " + std::to_string(houseCount));
 					JOP_DEBUG_INFO("Position X: " + std::to_string(j * tileSize) + " X tiles: " + std::to_string(tileCountX));
 					JOP_DEBUG_INFO("Position Y: " + std::to_string(i * tileSize) + " Y tiles: " + std::to_string(tileCountY));
 					JOP_DEBUG_INFO("################");
-
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize, i * tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize, i * tileSize - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize + tileSize, i * tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize + tileSize, i * tileSize - tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize + tileSize, i * tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-					//vertices.push_back(Vertex(glm::vec3(j * tileSize, i * tileSize - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
 
 					mapObjects->setPosition(housePosition.x + houseSize.x / 2, housePosition.y - houseSize.y / 2, -0.1f);
 					mapObjects->createComponent<RigidBody2D>(scene.getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("house_", houseSize ), RigidBody::Type::Static, 1.f));
