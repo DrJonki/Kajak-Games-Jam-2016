@@ -91,7 +91,7 @@ public:
 		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
 		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 200.f);
 		static jop::DynamicSetting<float> driveControl("game@driveControl", 12.f);
-		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 8.f);
+		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 4.f);
 		static jop::DynamicSetting<float> maxSpeed("game@maxSpeed", 18.f);
 		
 
@@ -129,10 +129,8 @@ public:
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Down))
 		{
-			//back brake
-			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
-			//front brake
-			carObj->applyForce(-linearFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime, glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
+			carObj->applyForce((-0.4f*rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
 		}
 
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::LControl))
@@ -200,15 +198,15 @@ public:
 			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
 				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
 
-			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
-				glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
+			/*carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
+				glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));*/
 
 			//JOP_DEBUG_DIAG(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? glm::vec2(-carObj->getLinearVelocity().y, carObj->getLinearVelocity().x) : glm::vec2(0, 1))));
 			
 		//driveControl	
 			float lol = glm::dot(glm::normalize(glm::length(driveDirection) > 0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity()) > 0 ? glm::vec2(-carObj->getLinearVelocity().y, carObj->getLinearVelocity().x) : glm::vec2(0, 1)));
 			
-			if (glm::length(carObj->getLinearVelocity()) > driveControlActivationSpeed.value)
+			if (glm::length(carObj->getLinearVelocity()) > driveControlActivationSpeed.value && jop::Keyboard::isKeyDown(jop::Keyboard::Up))
 			{
 				if (lol > 0)
 				{
