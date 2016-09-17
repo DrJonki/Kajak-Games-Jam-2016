@@ -96,12 +96,12 @@ public:
 
 		glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
 
-		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 200.f);
-		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 12.f);
-		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 500.f);
+		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 600.f);
+		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 21.f);
+		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 1000.f);
 		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 1000.f);
 		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 1000.f);
-		static jop::DynamicSetting<float> driveControl("game@driveControl", 5.f);
+		static jop::DynamicSetting<float> driveControl("game@driveControl", 12.f);
 		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 5.f);
 		static jop::DynamicSetting<float> maxSpeed("game@maxSpeed", 40.f);
 		
