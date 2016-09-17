@@ -31,6 +31,12 @@ public:
 
 
 		createChild("debugDot")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(0.1f));
+
+
+		// Debug camera mode
+		auto camSize = cam->getSize();
+		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
+
 	}
 
 	void HandleKey(const int key){
@@ -61,7 +67,7 @@ public:
 
 		//(driveDirection.x << ", " << driveDirection.y);
 		//JOP_DEBUG_DIAG(speedDirection.x << ", " << speedDirection.y);
-		JOP_DEBUG_DIAG(angleBetween);
+		//JOP_DEBUG_DIAG(angleBetween);
 
 		return speedDirection; // -linearFriction*sin(angleBetween)*speedDirection;
 		
@@ -129,7 +135,6 @@ public:
 		//carObj->applyCentralForce(slideAccelerator()*deltaTime);
 		
 		findChild("cam")->setPosition(carObj->getObject()->getGlobalPosition());
-
     }
 };
 
