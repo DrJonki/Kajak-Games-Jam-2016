@@ -2,6 +2,8 @@
 
 #include <Jopnal/Jopnal.hpp>
 #include "MapGenerator.h"
+#include "SpawnManager.hpp"
+#include "Helo.hpp"
 
 class MyScene : public jop::Scene
 {
@@ -21,12 +23,15 @@ public:
         createChild("cam")->createComponent<jop::Camera>(getRenderer(), jop::Camera::Projection::Orthographic);
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		cam->setSize(cam->getSize()*10.f);
+        cam->setClippingPlanes(-26.f, 1.f);
+
+        createChild("ground")->move(0.f, 0.f, -0.2f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<CircleMesh>("asfiohaf", 10.f, 30), rm::getEmpty<Material>("asdadaafg").setLightingModel(Material::LightingModel::BlinnPhong));
 
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.png"),false).
+			setTexture(rm::get<Texture2D>("car.png"), false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
-		MapGenerator map = MapGenerator(*this);
+		//MapGenerator map = MapGenerator(*this);
 		getWorld<2>().setGravity(glm::vec2());
 		getWorld<2>().setDebugMode(true);
 
@@ -35,6 +40,9 @@ public:
 		auto camSize = cam->getSize();
 		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
 
+
+        createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
+        createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
 	void HandleKey(const int key){

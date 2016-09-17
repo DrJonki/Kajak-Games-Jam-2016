@@ -23,5 +23,11 @@
     <ClInclude Include="..\src\MapGenerator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\SpawnManager.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Helo.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
