@@ -22,7 +22,7 @@ public:
 		cam->setSize(cam->getSize()*10.f);
 
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.jpg"),false).
+			setTexture(rm::get<Texture2D>("car.png"),false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
 		MapGenerator map = MapGenerator(*this);

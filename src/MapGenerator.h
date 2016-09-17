@@ -32,7 +32,7 @@ private:
 				{
 
 					scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->addTag("road");
-					scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->getComponent<Sprite>()->setTexture(rm::get<Texture2D>("road.jpg"), false);
+					scene.findChild("tile_" + std::to_string(i) + "_" + std::to_string(j))->getComponent<Sprite>()->setTexture(rm::get<Texture2D>("road.png"), false);
 				}
 			}
 		}
@@ -123,8 +123,8 @@ private:
 		typedef ResourceManager rm;
 		int houseCount = 0;
 		auto m_atlas = &rm::getNamed<jop::TextureAtlas>("houseBlocks", glm::uvec2(4096));
-		auto roadIndex = m_atlas->addTexture("road.jpg");
-		auto houseIndex = m_atlas->addTexture("car.jpg");
+		auto roadIndex = m_atlas->addTexture("road.png");
+		auto houseIndex = m_atlas->addTexture("car.png");
 
 		std::vector<jop::Vertex> vertices;
 
