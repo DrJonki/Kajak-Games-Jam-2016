@@ -3,6 +3,7 @@
 #include <Jopnal/Jopnal.hpp>
 #include "MapGenerator.h"
 #include "SpawnManager.hpp"
+#include "Helo.hpp"
 
 class MyScene : public jop::Scene
 {
@@ -21,6 +22,7 @@ public:
         createChild("cam")->createComponent<jop::Camera>(getRenderer(), jop::Camera::Projection::Orthographic);
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		cam->setSize(cam->getSize()*10.f);
+        cam->setClippingPlanes(-26.f, 1.f);
 
 		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
 			setTexture(rm::get<Texture2D>("car.jpg"),false).
@@ -34,6 +36,7 @@ public:
 		createChild("debugDot")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(0.1f));
 
         createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
+        createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
 	void HandleKey(const int key){
@@ -64,7 +67,7 @@ public:
 
 		//(driveDirection.x << ", " << driveDirection.y);
 		//JOP_DEBUG_DIAG(speedDirection.x << ", " << speedDirection.y);
-		JOP_DEBUG_DIAG(angleBetween);
+		//JOP_DEBUG_DIAG(angleBetween);
 
 		return speedDirection; // -linearFriction*sin(angleBetween)*speedDirection;
 		

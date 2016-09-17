@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Jopnal/Jopnal.hpp>
-
 using namespace jop;
 
 const float SpawnSpeed[] =
@@ -65,7 +63,12 @@ public:
         auto& pos = o->move(dirs[static_cast<int>(m_dir)] * deltaTime).getGlobalPosition();
 
         if (pos.x <= m_limBL.x || pos.x >= m_limTR.x || pos.y <= m_limBL.y || pos.y >= m_limTR.y)
+        {
             o->removeSelf();
+            return;
+        }
+
+        
     }
 };
 

@@ -87,6 +87,7 @@
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Helo.hpp" />
     <ClInclude Include="..\src\MapGenerator.h" />
     <ClInclude Include="..\src\SpawnManager.hpp" />
   </ItemGroup>
