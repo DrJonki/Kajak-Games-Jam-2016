@@ -84,13 +84,13 @@ public:
 
 		glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
 
-		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 100.f);
-		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 10.f);
-		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 200.f);
+		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 400.f);
+		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 12.f);
+		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 500.f);
 		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
 		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 200.f);
-		static jop::DynamicSetting<float> driveControl("game@driveControl", 10.f);
-		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 0.5f);
+		static jop::DynamicSetting<float> driveControl("game@driveControl", 11.f);
+		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 8.f);
 		
 
 		float angleBetweenVeloAndDir = acos(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? carObj->getLinearVelocity() : glm::vec2(0, 1))));
