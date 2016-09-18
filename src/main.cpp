@@ -240,7 +240,7 @@ public:
 		}
 			
 
-		if (angleBetweenVeloAndDir>0)
+		if (angleBetweenVeloAndDir>0 && glm::length(carObj->getLinearVelocity()) > 0.1f)
 		{
 			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
 				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
@@ -270,6 +270,11 @@ public:
 					}
 				}
 			}
+		}
+		else if (!jop::Keyboard::isKeyDown(jop::Keyboard::Up) && !jop::Keyboard::isKeyDown(jop::Keyboard::Down))
+		{
+			carObj->setLinearVelocity(glm::vec2());
+			carObj->setAngularVelocity(0);
 		}
     }
 };
