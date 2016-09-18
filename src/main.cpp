@@ -94,7 +94,7 @@ public:
             car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/metalHit.wav")).setID(2);
 
             // pedestrian
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(3);
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/auts2.wav")).setID(3);
 
             // explosion
             car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/carHit.wav")).setID(4);
