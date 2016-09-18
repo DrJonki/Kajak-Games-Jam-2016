@@ -1,6 +1,9 @@
 // For info on the uncommented lines, see the spinning_box example
 
 #include <Jopnal/Jopnal.hpp>
+
+unsigned int score = 0;
+
 #include "MapGenerator.h"
 #include "SpawnManager.hpp"
 #include "Helo.hpp"
@@ -29,12 +32,14 @@ namespace sc
             }
             else if (o->hasTag("spawn_ped"))
             {
+                ++score;
                 m_car->getComponent<SoundEffect>(3)->playReset();
 				o->getComponent<Spawn>()->crash(m_car);
             }
             else if(o->hasTag("spawn_car"))
             {
 				o->getComponent<Spawn>()->crash(m_car);
+                ++score;
             }
         }
 
@@ -53,9 +58,12 @@ public:
 	float steeringAngle = 0.0f;
 	bool isDrifting = false;
 	float m_timer;
+    float m_timelim;
     MyScene()
         : jop::Scene("MyScene"),
         m_object(),
+        m_timer(0.f),
+        m_timelim(0.f),
         m_listener()
     {
 		using namespace jop;
@@ -64,6 +72,8 @@ public:
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		cam->setSize(cam->getSize()*10.f);
         cam->setClippingPlanes(-26.f, 1.f);
+
+        createChild("uicam")->createComponent<jop::Camera>(getRenderer(), Camera::Projection::Orthographic).setRenderMask(2);
 
 		createChild("car")->move(10.f, 25.f, 1.f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
             getObject()->createComponent<RigidBody2D>(getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f, 2.f), RigidBody::Type::Dynamic, 1.f)).registerListener(m_listener);
@@ -107,6 +117,9 @@ public:
 		JOP_DEBUG_INFO("Map size :" +  std::to_string(map->getMapSize().x));
         createComponent<SpawnManager>(glm::vec2(20,-10), map->getMapSize());
         createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
+
+        createChild("score")->setScale(0.001f).move(-0.6f, 0.4f, 0.f).createComponent<Text>(getRenderer(), RenderPass::Pass::AfterPost, RenderPass::DefaultWeight).setRenderGroup(1);
+        createChild("time")->setScale(0.001f).move(0.4f, 0.4f, 0.f).createComponent<Text>(getRenderer(), RenderPass::Pass::AfterPost, RenderPass::DefaultWeight).setRenderGroup(1);
 	}
 
 	void HandleKey(const int key){
@@ -380,6 +393,14 @@ public:
 			carObj->setLinearVelocity(glm::vec2());
 			carObj->setAngularVelocity(0);
 		}
+
+        const int timeSeconds = static_cast<int>(std::ceil(120.f - (m_timelim += deltaTime)));
+
+        if (timeSeconds <= 0)
+            Engine::exit();
+
+        findChild("score")->getComponent<Text>()->setString("Score: " + std::to_string(score));
+        findChild("time")->getComponent<Text>()->setString("Time: " + std::to_string(timeSeconds / 60) + ":" + std::to_string(timeSeconds % 60)); 
     }
 };
 

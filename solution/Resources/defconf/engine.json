@@ -13,7 +13,7 @@
             "Material": {
                 "sDefaultAmbient": "222222FF"
             },
-            "uMaxPointLights": 2,
+            "uMaxPointLights": 8,
             "uMaxDirectionalLights": 3,
             "uMaxSpotLights": 1
         },
