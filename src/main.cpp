@@ -82,9 +82,10 @@ public:
         {
             auto car = findChild("car");
             m_listener.m_car = car;
+			car->createComponent<jop::Listener>();
 
             // Engine
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/car_loop.wav")).setLoop(true).play().setID(0);
+			car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/car_loop.wav")).setLoop(true).play().setID(0);
 
             // drift
             car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/driftLoop.wav")).setLoop(true).play().setVolume(0.f).setID(1);
@@ -157,6 +158,7 @@ public:
     void preUpdate(const float deltaTime) override
     {
 		auto carObj = findChild("car")->getComponent<jop::RigidBody2D>();
+		jop::SoundEffect* sounds[2] = { findChild("car")->getComponent<jop::SoundEffect>(0), findChild("car")->getComponent<jop::SoundEffect>(1) };
 
 		glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
 
@@ -303,11 +305,30 @@ public:
 		if (angleBetweenVeloAndDir > 0.07)
 		{
 			isDrifting = true;
+			sounds[1]->setVolume((60.f) - angleBetweenVeloAndDir*100);
 		}
 		else
 		{
 			isDrifting = false;
+			sounds[1]->setVolume(0.f);
 		}
+
+		// Drift sound
+		if (angleBetweenVeloAndDir > 0.55f)
+		{
+			float driftVolume = (80.f) - angleBetweenVeloAndDir * 50;
+			float driftPitch = (0.9f) + angleBetweenVeloAndDir / 8;
+			sounds[1]->setVolume(driftVolume);
+			sounds[1]->setPitch(driftPitch);
+		}
+		else
+		{
+			sounds[1]->setVolume(0.f);
+		}
+
+		// Car sound
+		sounds[0]->setPitch(glm::length(carObj->getLinearVelocity())/10 + 0.5f);
+
 			
 
 		if (angleBetweenVeloAndDir>0 && glm::length(carObj->getLinearVelocity()) > 0.1f)
