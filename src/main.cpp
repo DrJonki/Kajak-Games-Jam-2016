@@ -98,6 +98,17 @@ public:
 
             // explosion
             car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/carHit.wav")).setID(4);
+
+			// music
+			car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/song_2.wav")).setLoop(true).play().setID(5);
+
+			car->getComponent<jop::SoundEffect>(0)->setVolume(50.f);
+			car->getComponent<jop::SoundEffect>(1)->setVolume(50.f);
+			car->getComponent<jop::SoundEffect>(2)->setVolume(50.f);
+			car->getComponent<jop::SoundEffect>(3)->setVolume(50.f);
+			car->getComponent<jop::SoundEffect>(4)->setVolume(50.f);
+
+
         }
 
 		getWorld<2>().setGravity(glm::vec2());
@@ -110,15 +121,6 @@ public:
         createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
-	void HandleKey(const int key){
-		switch (key)
-		{
-			case jop::Keyboard::Up:
-			{
-				
-			}
-		}
-	}
 
 	void zoomCamera(float zoom)
 	{
@@ -205,8 +207,11 @@ public:
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Down))
 		{
-			carObj->applyForce((-0.4f*rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+			if (!jop::Keyboard::isKeyDown(jop::Keyboard::Up))
+			{
+				carObj->applyForce((-0.4f*rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
 				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
+			}
 		}
 
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::LControl))
@@ -390,7 +395,7 @@ class EventHandler :public jop::WindowEventHandler{
 		void keyPressed(const int key, const int, const int) override
 		{
 			auto &scene = jop::Engine::getCurrentScene();
-			static_cast <MyScene&>(scene).HandleKey(key);
+			//static_cast <MyScene&>(scene).HandleKey(key);
 		}
 	
 };
