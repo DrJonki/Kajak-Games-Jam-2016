@@ -10,19 +10,27 @@ private:
 
     WeakReference<const Object> m_player;
     WeakReference<Object> m_light;
+	WeakReference<Object> m_redLight;
+	WeakReference<Object> m_blueLight;
     WeakReference<Object> m_rotor;
+	float m_timer;
+	float m_cycleTime;
     glm::vec2 m_target;
     glm::vec2 m_lightTarget;
 
 public:
 
-    Helo(Object& obj, Renderer& rend, WeakReference<const Object> player)
-        : Drawable(obj, rend),
-          m_player(player),
-          m_light(obj.createChild("light")),
-          m_rotor(obj.createChild("rotor")),
-          m_target(0.f, 8.f),
-          m_lightTarget(0.f, 0.5f)
+	Helo(Object& obj, Renderer& rend, WeakReference<const Object> player)
+		: Drawable(obj, rend),
+		m_player(player),
+		m_light(obj.createChild("light")),
+		m_redLight(obj.createChild("red_light")),
+		m_blueLight(obj.createChild("blue_light")),
+		m_rotor(obj.createChild("rotor")),
+		m_target(0.f, 8.f),
+		m_lightTarget(0.f, 0.5f),
+		m_timer(0),
+		m_cycleTime(3)
     {
         using RM = ResourceManager;
 
@@ -62,6 +70,21 @@ public:
             light.setAttenuation(25.f);
             light.setIntensity(LightSource::Intensity::Diffuse, Color::White * 25.f);
         }
+
+		// Red Light
+		m_redLight->setPosition(-0.5f, 0, -12);
+		auto& redLight = m_redLight->createComponent<LightSource>(rend, LightSource::Type::Point);
+		redLight.setAttenuation(5.f);
+		redLight.setIntensity(LightSource::Intensity::Diffuse, Color::Red * 50.f);
+		m_redLight->setActive(false);
+
+		// Blue Light
+		m_blueLight->setPosition(0.5f, 0, -12);
+		auto& blueLight = m_blueLight->createComponent<LightSource>(rend, LightSource::Type::Point);
+		blueLight.setAttenuation(0.f);
+		blueLight.setIntensity(LightSource::Intensity::Diffuse, Color::Blue * 50.f);
+		m_blueLight->setActive(true);
+
     }
 
     void update(const float deltaTime) override
@@ -86,5 +109,12 @@ public:
         // Light
         m_lightTarget = glm::rotate(m_lightTarget, glm::two_pi<float>() / 2.f * deltaTime);
         m_light->lookAt(m_player->getGlobalPosition() + glm::vec3(m_lightTarget, 0.f));
+		
+		m_timer += 20*deltaTime;
+		m_redLight->getComponent<LightSource>()->setAttenuation(5 * (sin(m_timer / m_cycleTime) + 0.5f));
+		m_blueLight->getComponent<LightSource>()->setAttenuation(5 * (cos(m_timer / m_cycleTime) + 0.5f));
+		
+
+		
     }
 };
