@@ -5,18 +5,53 @@
 #include "SpawnManager.hpp"
 #include "Helo.hpp"
 
+namespace sc
+{
+    class ContactListener : public jop::ContactListener2D
+    {
+    public:
+
+        ContactListener()
+            : jop::ContactListener2D()
+        {
+
+        }
+
+        void beginContact(Collider2D& collider, const ContactInfo2D& ci) override
+        {
+            auto o = collider.getObject();
+           
+            if (o->hasTag("house"))
+            {
+
+            }
+            else if (o->hasTag("spawn_ped"))
+            {
+                o->removeSelf();
+            }
+            else if(o->hasTag("spawn_car"))
+            {
+                o->removeSelf();
+            }
+        }
+
+    };
+}
+
 class MyScene : public jop::Scene
 {
 private:
 
     jop::WeakReference<jop::Object> m_object;
+    sc::ContactListener m_listener;
 
 public:
 	float steeringAngle = 0.0f;
 	bool isDrifting = false;
     MyScene()
         : jop::Scene("MyScene"),
-        m_object()
+        m_object(),
+        m_listener()
     {
 		using namespace jop;
 		typedef ResourceManager rm;
@@ -25,8 +60,16 @@ public:
 		cam->setSize(cam->getSize()*10.f);
         cam->setClippingPlanes(-26.f, 1.f);
 
-		createChild("car")->createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
-			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
+		createChild("car")->move(10.f, 25.f, 1.f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
+            getObject()->createComponent<RigidBody2D>(getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f, 2.f), RigidBody::Type::Dynamic, 1.f)).registerListener(m_listener);
+
+        {
+            auto light1 = findChild("car")->createChild("carlight1");
+            auto light2 = findChild("car")->createChild("carlight2");
+
+            light1->move(-0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 50.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+            light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 50.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+        }
 
 		MapGenerator map = MapGenerator(*this);
 		getWorld<2>().setGravity(glm::vec2());

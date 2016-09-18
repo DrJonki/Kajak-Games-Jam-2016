@@ -36,15 +36,25 @@ private:
 
 public:
 
-    Spawn(Object& obj, const glm::vec2& limbl, const glm::vec2& limtr, Renderer& rend, const Type type, const Dir direction)
+    Spawn(Object& obj, const glm::vec2& limbl, const glm::vec2& limtr, Renderer& rend, World2D& world, const Type type, const Dir direction)
         : Drawable  (obj, rend),
           m_type    (type),
           m_dir     (direction),
           m_limBL   (limbl),
           m_limTR   (limtr)
     {
+        std::string name;
         if (type == Type::Pedestrian)
+        {
             setColor(Color::Green);
+            name = "spawn_ped";
+        }
+        else
+            name = "spawn_car";
+
+        obj.addTag(name);
+
+        obj.createComponent<RigidBody2D>(world, RigidBody2D::ConstructInfo2D(ResourceManager::getNamed<CircleShape2D>(name + "_shape", getLocalBounds().second.x), RigidBody::Type::KinematicSensor));
     }
 
     void update(const float deltaTime) override
@@ -67,8 +77,6 @@ public:
             o->removeSelf();
             return;
         }
-
-        
     }
 };
 
@@ -83,6 +91,7 @@ private:
     const glm::vec2 m_tr; // top right
     float m_timer;
     Renderer& m_rend;
+    World2D& m_world;
     Randomizer m_rand;
 
 public:
@@ -94,6 +103,7 @@ public:
           m_tr      (topRight),
           m_timer   (0.f),
           m_rend    (obj.getScene().getRenderer()),
+          m_world   (obj.getScene().getWorld<2>()),
           m_rand    ()
     {
         using RM = ResourceManager;
@@ -104,7 +114,7 @@ public:
 
             resPair.first = static_ref_cast<Mesh>(RM::getNamed<RectangleMesh>("car_spawn_mesh", glm::vec2(1.f, 2.f)).getReference());
             resPair.second = static_ref_cast<Material>(RM::getEmpty<Material>("car_spawn_mat").getReference());
-            resPair.second->setMap(Material::Map::Diffuse0, RM::get<Texture2D>("car.jpg")).setLightingModel(Material::LightingModel::BlinnPhong);
+            resPair.second->setMap(Material::Map::Diffuse0, RM::get<Texture2D>("car.jpg")).setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White * 0.8f);
         }
 
         // Pedestrian resources
@@ -113,7 +123,7 @@ public:
 
             resPair.first = static_ref_cast<Mesh>(RM::getNamed<CircleMesh>("ped_spawn_mesh", 0.25f, 30).getReference());
             resPair.second = static_ref_cast<Material>(RM::getEmpty<Material>("ped_spawn_mat").getReference());
-            resPair.second->setLightingModel(Material::LightingModel::BlinnPhong);
+            resPair.second->setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White * 0.8f);
         }
     }
 
@@ -143,17 +153,17 @@ public:
         const int de = static_cast<int>(direction); // direction enum
 
         auto o = getObject()->createChild("");
-        o->createComponent<Spawn>(m_bl, m_tr, m_rend, type, direction).
+        o->createComponent<Spawn>(m_bl, m_tr, m_rend, m_world, type, direction).
         
             setModel(m_res[te].first, m_res[te].second);
 
         const glm::vec3 startPositions[] =
         {
             /* direction */
-            /* Left      */ glm::vec3(m_tr.x, offset, 0.f),
-            /* Right     */ glm::vec3(m_bl.x, offset, 0.f),
-            /* Up        */ glm::vec3(offset, m_bl.y, 0.f),
-            /* Down      */ glm::vec3(offset, m_tr.y, 0.f),
+            /* Left      */ glm::vec3(m_tr.x, offset, 0.2f),
+            /* Right     */ glm::vec3(m_bl.x, offset, 0.2f),
+            /* Up        */ glm::vec3(offset, m_bl.y, 0.2f),
+            /* Down      */ glm::vec3(offset, m_tr.y, 0.2f),
         };
         const float startRotations[] =
         {

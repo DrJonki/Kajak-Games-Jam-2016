@@ -6,10 +6,13 @@
         "Texture": {
             "bAllowCompression": false
         },
-        "Shading": { 
+        "Shading": {
             "Material": {
                 "sDefaultAmbient": "888888FF"
-            }
+            },
+            "uMaxPointLights": 0,
+            "uMaxDirectionalLights": 3,
+            "uMaxSpotLights": 1
         },
         "Postprocessor": {
             "Tonemapping": {
