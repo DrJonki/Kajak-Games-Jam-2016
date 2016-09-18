@@ -36,6 +36,10 @@ private:
 	AnimationAtlas &m_atlas;
 	Renderer &renderer;
 	bool hasCrashed;
+	glm::vec2 crashVector;
+	float m_timer;
+	AnimatedSprite *animSprite;
+	WeakReference<Object> m_player;
 
 public:
 
@@ -47,6 +51,8 @@ public:
           m_limTR   (limtr),
 		  m_atlas	(ResourceManager::get<AnimationAtlas>("explosion.png", glm::uvec2(5, 3))),
 		  renderer  (rend),
+		  m_timer	(0),
+		  animSprite(nullptr),
 		  hasCrashed(false)
     {
         std::string name;
@@ -86,16 +92,32 @@ public:
 				return;
 			}
 		}
-		if (hasCrashed && getObject()->getComponent<AnimatedSprite>()->getCurrentFrame() == 14)
+		else if (!getObject()->getComponent<AnimatedSprite>())
 		{
-			o->removeSelf();
+			o->move(glm::vec3(crashVector * deltaTime, 0.f)).rotate(0, 0, glm::pi<float>() * deltaTime);
+		}
+		if (hasCrashed && (m_timer += deltaTime) >= 1.f)
+		{
+			if (!animSprite )
+			{
+				animSprite = &getObject()->createComponent<AnimatedSprite>(renderer).setAtlas(m_atlas).setAnimationRange(0, 14).setFrameTime(1 / 30.f);
+				animSprite->play(1);
+				getObject()->setScale(0.05 - (m_type == Type::Pedestrian) * 0.03).setRotation(0, 0, 0);
+				m_player->getComponent<SoundEffect>(4)->playReset();
+			}
+
+			if (getObject()->getComponent<AnimatedSprite>()->getCurrentFrame() == 14)
+			{
+				o->removeSelf();
+			}
 		}
     }
-	void crash()
+	void crash(WeakReference<Object> player)
 	{
-		getObject()->setRotation(0, 0, 0).setScale(0.05);
+		m_player = player;
+		crashVector = glm::normalize(glm::vec2(getObject()->getGlobalPosition() - player->getGlobalPosition())) * 8.f;
 
-		getObject()->createComponent<AnimatedSprite>(renderer).setAtlas(m_atlas).setAnimationRange(0, 14).setFrameTime(1/30.f).play(1);
+		getObject()->move(0,0, 6);
 		hasCrashed = true;
 	}
 };
