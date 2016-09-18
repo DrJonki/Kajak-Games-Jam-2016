@@ -101,7 +101,7 @@ public:
         }
 
 		getWorld<2>().setGravity(glm::vec2());
-		getWorld<2>().setDebugMode(true);
+		//getWorld<2>().setDebugMode(true);
 
         createComponent<LightSource>(getRenderer(), LightSource::Type::Directional).setIntensity(Color::Gray, Color::Black, Color::Black);
 		map = new MapGenerator(*this);
@@ -120,12 +120,12 @@ public:
 		}
 	}
 
-	void zoomCamera(float deltaZoom)
+	void zoomCamera(float zoom)
 	{
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		auto camSize = cam->getSize();
 		//if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
-			cam->setSize(camSize + glm::vec2(deltaZoom, deltaZoom/(camSize.x/camSize.y)));
+			cam->setSize(glm::vec2(zoom, zoom/(camSize.x/camSize.y)));
 	}
 
 	//glm::vec2 slideAccelerator()
@@ -302,19 +302,17 @@ public:
 
 		//JOP_DEBUG_DIAG(glm::length(angleBetweenVeloAndDir));
 
-		if (angleBetweenVeloAndDir > 0.07)
+		if (angleBetweenVeloAndDir > 0.55f)
 		{
 			isDrifting = true;
-			sounds[1]->setVolume((60.f) - angleBetweenVeloAndDir*100);
 		}
 		else
 		{
 			isDrifting = false;
-			sounds[1]->setVolume(0.f);
 		}
 
 		// Drift sound
-		if (angleBetweenVeloAndDir > 0.55f)
+		if (isDrifting)
 		{
 			float driftVolume = (80.f) - angleBetweenVeloAndDir * 50;
 			float driftPitch = (0.9f) + angleBetweenVeloAndDir / 8;
@@ -327,8 +325,24 @@ public:
 		}
 
 		// Car sound
-		sounds[0]->setPitch(glm::length(carObj->getLinearVelocity())/10 + 0.5f);
+		float speedFloat = glm::length(carObj->getLinearVelocity());
+		sounds[0]->setPitch(speedFloat/10 + 0.5f);
 
+
+		// Camera zoom
+		float minZoom = 15.f;
+		float maxZoom = 45.f;
+
+		zoomCamera(minZoom + maxZoom*speedFloat/maxSpeed.value);
+
+		/*if (speedFloat > maxSpeed.value/2)
+		{
+			zoomCamera(1.f);
+		}
+		else
+		{
+			zoomCamera(-1.f);
+		}*/
 			
 
 		if (angleBetweenVeloAndDir>0 && glm::length(carObj->getLinearVelocity()) > 0.1f)
