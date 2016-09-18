@@ -58,7 +58,7 @@ public:
         std::string name;
         if (type == Type::Pedestrian)
         {
-            setColor(Color::Green);
+            //setColor(Color::Green);
             name = "spawn_ped";
         }
         else
@@ -163,9 +163,11 @@ public:
         {
             auto& resPair = m_res[static_cast<int>(Spawn::Type::Pedestrian)];
 
-            resPair.first = static_ref_cast<Mesh>(RM::getNamed<CircleMesh>("ped_spawn_mesh", 0.25f, 30).getReference());
+            //resPair.first = static_ref_cast<Mesh>(RM::getNamed<CircleMesh>("ped_spawn_mesh", 0.25f, 30).getReference());
+			resPair.first = static_ref_cast<Mesh>(RM::getNamed<RectangleMesh>("ped_spawn_mat", glm::vec2(1.f, 1.f)).getReference());
             resPair.second = static_ref_cast<Material>(RM::getEmpty<Material>("ped_spawn_mat").getReference());
-            resPair.second->setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White);
+           // resPair.second->setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White);
+			resPair.second->setMap(Material::Map::Diffuse0, RM::get<Texture2D>("granny.png")).setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White);
         }
     }
 
