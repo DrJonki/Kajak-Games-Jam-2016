@@ -28,6 +28,8 @@ public:
 
         obj.move(-10.f, 0.f, 20.f);
 
+        obj.createComponent<SoundEffect>().setBuffer(RM::get<SoundBuffer>("helicopter_loop.wav")).setLoop(true).play().setMinDistance(20.f);
+
         // Model
         {
             {
