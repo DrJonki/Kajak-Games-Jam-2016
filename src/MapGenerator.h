@@ -48,8 +48,8 @@ private:
 		int houseCount = 0;
 		auto m_atlas = &rm::getNamed<jop::TextureAtlas>("houseBlocks", glm::uvec2(4096));
 		
-		auto roadTexture = m_atlas->addTexture("roof.png");
-		auto houseTexture = m_atlas->addTexture("road.png");
+		auto roadTexture = m_atlas->addTexture("road.png");
+		auto houseTexture = m_atlas->addTexture("house.png");
 
 		auto roadIndex = m_atlas->getCoordinates(roadTexture);
 		auto houseIndex = m_atlas->getCoordinates(houseTexture);

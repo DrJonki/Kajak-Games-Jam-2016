@@ -114,7 +114,7 @@ public:
 
             resPair.first = static_ref_cast<Mesh>(RM::getNamed<RectangleMesh>("car_spawn_mesh", glm::vec2(1.f, 2.f)).getReference());
             resPair.second = static_ref_cast<Material>(RM::getEmpty<Material>("car_spawn_mat").getReference());
-            resPair.second->setMap(Material::Map::Diffuse0, RM::get<Texture2D>("car.jpg")).setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White * 0.8f);
+            resPair.second->setMap(Material::Map::Diffuse0, RM::get<Texture2D>("car.jpg")).setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White);
         }
 
         // Pedestrian resources
@@ -123,7 +123,7 @@ public:
 
             resPair.first = static_ref_cast<Mesh>(RM::getNamed<CircleMesh>("ped_spawn_mesh", 0.25f, 30).getReference());
             resPair.second = static_ref_cast<Material>(RM::getEmpty<Material>("ped_spawn_mat").getReference());
-            resPair.second->setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White * 0.8f);
+            resPair.second->setLightingModel(Material::LightingModel::BlinnPhong).setReflection(Material::Reflection::Ambient, Color::White);
         }
     }
 

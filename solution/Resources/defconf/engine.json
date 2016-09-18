@@ -8,7 +8,7 @@
         },
         "Shading": {
             "Material": {
-                "sDefaultAmbient": "888888FF"
+                "sDefaultAmbient": "BBBBBBFF"
             },
             "uMaxPointLights": 0,
             "uMaxDirectionalLights": 3,

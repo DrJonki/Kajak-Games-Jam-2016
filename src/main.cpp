@@ -67,8 +67,8 @@ public:
             auto light1 = findChild("car")->createChild("carlight1");
             auto light2 = findChild("car")->createChild("carlight2");
 
-            light1->move(-0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 50.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
-            light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 50.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+            light1->move(-0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+            light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
         }
 
 		MapGenerator map = MapGenerator(*this);

@@ -26,7 +26,7 @@ public:
     {
         using RM = ResourceManager;
 
-        obj.move(-10.f, 0.f, 15.f);
+        obj.move(-10.f, 0.f, 20.f);
 
         // Model
         {
