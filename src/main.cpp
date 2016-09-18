@@ -225,14 +225,14 @@ public:
 		{
 			if (glm::length(carObj->getLinearVelocity()) > 1)
 			{
-				carObj->applyTorque(rotateTorgue);
+				carObj->applyTorque((jop::Keyboard::isKeyDown(jop::Keyboard::Down) ? -1.f : 1.f)*rotateTorgue);
 			}
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Right))
 		{
 			if (glm::length(carObj->getLinearVelocity()) > 1)
 			{
-				carObj->applyTorque(-rotateTorgue);
+				carObj->applyTorque((jop::Keyboard::isKeyDown(jop::Keyboard::Down) ? -1.f:1.f)*- rotateTorgue);
 			}
 			
 		}
