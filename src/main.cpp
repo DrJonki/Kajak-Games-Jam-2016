@@ -11,6 +11,8 @@ namespace sc
     {
     public:
 
+        WeakReference<Object> m_car;
+
         ContactListener()
             : jop::ContactListener2D()
         {
@@ -23,14 +25,16 @@ namespace sc
            
             if (o->hasTag("house"))
             {
-
+                m_car->getComponent<SoundEffect>(2)->playReset();
             }
             else if (o->hasTag("spawn_ped"))
             {
+                m_car->getComponent<SoundEffect>(3)->playReset();
                 o->removeSelf();
             }
             else if(o->hasTag("spawn_car"))
             {
+                m_car->getComponent<SoundEffect>(4)->playReset();
                 o->removeSelf();
             }
         }
@@ -63,12 +67,34 @@ public:
 		createChild("car")->move(10.f, 25.f, 1.f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
             getObject()->createComponent<RigidBody2D>(getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f, 2.f), RigidBody::Type::Dynamic, 1.f)).registerListener(m_listener);
 
+        // Car lights
         {
             auto light1 = findChild("car")->createChild("carlight1");
             auto light2 = findChild("car")->createChild("carlight2");
 
             light1->move(-0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
             light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+        }
+
+        // Car sounds
+        {
+            auto car = findChild("car");
+            m_listener.m_car = car;
+
+            // Engine
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(0);
+
+            // drift
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(1);
+
+            // crash
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(2);
+
+            // pedestrian
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(3);
+
+            // explosion
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(4);
         }
 
 		MapGenerator map = MapGenerator(*this);
