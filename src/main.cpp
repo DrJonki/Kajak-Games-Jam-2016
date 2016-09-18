@@ -11,6 +11,8 @@ namespace sc
     {
     public:
 
+        WeakReference<Object> m_car;
+
         ContactListener()
             : jop::ContactListener2D()
         {
@@ -23,14 +25,16 @@ namespace sc
            
             if (o->hasTag("house"))
             {
-
+                m_car->getComponent<SoundEffect>(2)->playReset();
             }
             else if (o->hasTag("spawn_ped"))
             {
+                m_car->getComponent<SoundEffect>(3)->playReset();
                 o->removeSelf();
             }
             else if(o->hasTag("spawn_car"))
             {
+                m_car->getComponent<SoundEffect>(4)->playReset();
                 o->removeSelf();
             }
         }
@@ -43,11 +47,13 @@ class MyScene : public jop::Scene
 private:
 
     jop::WeakReference<jop::Object> m_object;
+	MapGenerator *map;
     sc::ContactListener m_listener;
 
 public:
 	float steeringAngle = 0.0f;
 	bool isDrifting = false;
+	float m_timer;
     MyScene()
         : jop::Scene("MyScene"),
         m_object(),
@@ -63,6 +69,7 @@ public:
 		createChild("car")->move(10.f, 25.f, 1.f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
             getObject()->createComponent<RigidBody2D>(getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f, 2.f), RigidBody::Type::Dynamic, 1.f)).registerListener(m_listener);
 
+        // Car lights
         {
             auto light1 = findChild("car")->createChild("carlight1");
             auto light2 = findChild("car")->createChild("carlight2");
@@ -71,13 +78,34 @@ public:
             light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
         }
 
-		MapGenerator map = MapGenerator(*this);
+        // Car sounds
+        {
+            auto car = findChild("car");
+            m_listener.m_car = car;
+
+            // Engine
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/car_loop.wav")).setLoop(true).play().setID(0);
+
+            // drift
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/driftLoop.wav")).setLoop(true).play().setVolume(0.f).setID(1);
+
+            // crash
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/metalHit.wav")).setID(2);
+
+            // pedestrian
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(3);
+
+            // explosion
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/carHit.wav")).setID(4);
+        }
+
 		getWorld<2>().setGravity(glm::vec2());
 		getWorld<2>().setDebugMode(true);
 
         createComponent<LightSource>(getRenderer(), LightSource::Type::Directional).setIntensity(Color::Gray, Color::Black, Color::Black);
-
-        createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
+		map = new MapGenerator(*this);
+		JOP_DEBUG_INFO("Map size :" +  std::to_string(map->getMapSize().x));
+        createComponent<SpawnManager>(glm::vec2(20,-10), map->getMapSize());
         createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
@@ -95,7 +123,7 @@ public:
 	{
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		auto camSize = cam->getSize();
-		if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
+		//if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
 			cam->setSize(camSize + glm::vec2(deltaZoom, deltaZoom/(camSize.x/camSize.y)));
 	}
 
@@ -143,7 +171,6 @@ public:
 		
 
 		float angleBetweenVeloAndDir = acos(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? carObj->getLinearVelocity() : glm::vec2(0, 1))));
-
 
 		float angularVelo = carObj->getAngularVelocity();
 		if (angularVelo > 0.04)
@@ -216,7 +243,50 @@ public:
 			zoomCamera(1.f);
 		}
 
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::F))
+		{
+			JOP_DEBUG_INFO("Car pos: " + std::to_string(findChild("car")->getLocalPosition().x) + " : " + std::to_string(findChild("car")->getLocalPosition().y));
+		}
 
+		if ((m_timer += deltaTime) >= 1.5f)
+		{
+
+			int roadIndexY = rand() % map->getRandomYRoads().size();
+
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Right, map->getRandomYRoads()[roadIndexY] - map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Left, map->getRandomYRoads()[roadIndexY] + map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Right, map->getRandomYRoads()[roadIndexY] - map->getTileSize() / 3);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Left, map->getRandomYRoads()[roadIndexY] + map->getTileSize() / 3);
+
+			int roadIndexX = rand() % map->getRandomXRoads().size();
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Up, map->getRandomXRoads()[roadIndexX] - map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Down, map->getRandomXRoads()[roadIndexX] + map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Up, map->getRandomXRoads()[roadIndexX] - map->getTileSize() / 3);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Down, map->getRandomXRoads()[roadIndexX] + map->getTileSize() / 3);
+
+			m_timer -= 1.5f;
+		}
+
+		// x
+		if (findChild("car")->getLocalPosition().x <= 20)
+		{
+			findChild("car")->setPosition(glm::vec3(map->getMapSize().x - 30, findChild("car")->getLocalPosition().y, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		if (findChild("car")->getLocalPosition().x >= map->getMapSize().x)
+		{
+			findChild("car")->setPosition(glm::vec3(40, findChild("car")->getLocalPosition().y, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		
+		// y
+		if (findChild("car")->getLocalPosition().y <= -10)
+		{
+			findChild("car")->setPosition(glm::vec3(findChild("car")->getLocalPosition().x, map->getMapSize().y - 40, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		if (findChild("car")->getLocalPosition().y >= map->getMapSize().y -20)
+		{
+			findChild("car")->setPosition(glm::vec3(findChild("car")->getLocalPosition().x, 40, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		
 		// sliding makes car go slower
 
 		//slideAccelerator();

@@ -2,13 +2,16 @@
     "Physics2D": {
         "uUpdateFrequency": 60
     },
+    "DefaultWindow": { 
+        "uMode": 2
+    },
     "Graphics": {
         "Texture": {
             "bAllowCompression": false
         },
         "Shading": {
             "Material": {
-                "sDefaultAmbient": "BBBBBBFF"
+                "sDefaultAmbient": "222222FF"
             },
             "uMaxPointLights": 2,
             "uMaxDirectionalLights": 3,
