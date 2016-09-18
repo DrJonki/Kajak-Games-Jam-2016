@@ -50,7 +50,7 @@ private:
 		auto m_atlas = &rm::getNamed<jop::TextureAtlas>("houseBlocks", glm::uvec2(4096));
 		
 		auto roadTexture = m_atlas->addTexture("road.png");
-		auto houseTexture = m_atlas->addTexture("car.png");
+		auto houseTexture = m_atlas->addTexture("house.png");
 
 		auto roadIndex = m_atlas->getCoordinates(roadTexture);
 		auto houseIndex = m_atlas->getCoordinates(houseTexture);
@@ -58,6 +58,7 @@ private:
 		std::vector<jop::Vertex> vertices;
 
 		auto mapObjects = scene.createChild("mapObjects");
+        mapObjects->addTag("house");
 
 		for (int i = 0; i < mapSize; i++)
 		{
@@ -112,13 +113,13 @@ private:
 						{
 							if (c < tileCountY)
 							{
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y, 10.f), glm::vec2(houseIndex.first.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 10.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 10.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
 
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.second.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 0.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
-								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 0.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y - tileSize, 10.f), glm::vec2(houseIndex.second.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x + tileSize, (-c * tileSize) + housePosition.y, 10.f), glm::vec2(houseIndex.second.x, houseIndex.first.y), glm::vec3(0, 0, 1)));
+								vertices.push_back(Vertex(glm::vec3((k * tileSize) + housePosition.x, (-c * tileSize) + housePosition.y - tileSize, 10.f), glm::vec2(houseIndex.first.x, houseIndex.second.y), glm::vec3(0, 0, 1)));
 							}
 							else
 							{
@@ -160,7 +161,7 @@ private:
 		}
 		auto &houseMesh = rm::getNamed<jop::Mesh>("houseBlock", vertices, std::vector<unsigned>());
 		mapObjects->setPosition(0, 0, -0.5f);
-		mapObjects->createComponent<jop::Drawable>(scene.getRenderer()).setMesh(houseMesh).setMaterial(rm::getEmpty<jop::Material>("houseMaterial").setMap(jop::Material::Map::Diffuse0, m_atlas->getTexture()));
+		mapObjects->createComponent<jop::Drawable>(scene.getRenderer()).setMesh(houseMesh).setMaterial(rm::getEmpty<jop::Material>("houseMaterial").setMap(jop::Material::Map::Diffuse0, m_atlas->getTexture()).setLightingModel(Material::LightingModel::BlinnPhong));
 	}
 
 public:

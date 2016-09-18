@@ -5,12 +5,46 @@
 #include "SpawnManager.hpp"
 #include "Helo.hpp"
 
+namespace sc
+{
+    class ContactListener : public jop::ContactListener2D
+    {
+    public:
+
+        ContactListener()
+            : jop::ContactListener2D()
+        {
+
+        }
+
+        void beginContact(Collider2D& collider, const ContactInfo2D& ci) override
+        {
+            auto o = collider.getObject();
+           
+            if (o->hasTag("house"))
+            {
+
+            }
+            else if (o->hasTag("spawn_ped"))
+            {
+                o->removeSelf();
+            }
+            else if(o->hasTag("spawn_car"))
+            {
+                o->removeSelf();
+            }
+        }
+
+    };
+}
+
 class MyScene : public jop::Scene
 {
 private:
 
     jop::WeakReference<jop::Object> m_object;
 	MapGenerator *map;
+    sc::ContactListener m_listener;
 
 public:
 	float steeringAngle = 0.0f;
@@ -18,7 +52,8 @@ public:
 	float m_timer;
     MyScene()
         : jop::Scene("MyScene"),
-        m_object()
+        m_object(),
+        m_listener()
     {
 		using namespace jop;
 		typedef ResourceManager rm;
@@ -27,19 +62,21 @@ public:
 		cam->setSize(cam->getSize()*10.f);
         cam->setClippingPlanes(-26.f, 1.f);
 
-        createChild("ground")->move(0.f, 0.f, -0.2f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<CircleMesh>("asfiohaf", 10.f, 30), rm::getEmpty<Material>("asdadaafg").setLightingModel(Material::LightingModel::BlinnPhong));
+		createChild("car")->move(10.f, 25.f, 1.f).createComponent<Drawable>(getRenderer()).setModel(rm::getNamed<RectangleMesh>("car_mesh", glm::vec2(1.f, 2.f)), rm::getEmpty<Material>("car_mat").setMap(Material::Map::Diffuse0, rm::get<Texture2D>("car.png")).setLightingModel(Material::LightingModel::BlinnPhong)).
+            getObject()->createComponent<RigidBody2D>(getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f, 2.f), RigidBody::Type::Dynamic, 1.f)).registerListener(m_listener);
 
-		createChild("car")->createComponent<Sprite>(getRenderer()).setSize(glm::vec2(1.f,2.f)).
-			setTexture(rm::get<Texture2D>("car.png"), false).
-			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
+        {
+            auto light1 = findChild("car")->createChild("carlight1");
+            auto light2 = findChild("car")->createChild("carlight2");
+
+            light1->move(-0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+            light2->move(0.2f, -5.f, 0.5f).rotate(glm::half_pi<float>(), 0.0f, 0.f).createComponent<LightSource>(getRenderer(), LightSource::Type::Spot).setIntensity(LightSource::Intensity::Diffuse, Color::White * 100.f).setAttenuation(10.f).setCutoff(glm::radians(8.f), glm::radians(10.f));
+        }
 
 		getWorld<2>().setGravity(glm::vec2());
 		getWorld<2>().setDebugMode(true);
 
-		// Debug camera mode
-		auto camSize = cam->getSize();
-		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
-
+        createComponent<LightSource>(getRenderer(), LightSource::Type::Directional).setIntensity(Color::Gray, Color::Black, Color::Black);
 		map = new MapGenerator(*this);
 		JOP_DEBUG_INFO("Map size :" +  std::to_string(map->getMapSize().x));
         createComponent<SpawnManager>(glm::vec2(20,-10), map->getMapSize());
@@ -97,14 +134,14 @@ public:
 
 		glm::vec2 driveDirection = glm::vec2(findChild("car")->getLocalUp());
 
-		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 200.f);
-		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 10.f);
-		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 500.f);
-		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 200.f);
-		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 200.f);
+		static jop::DynamicSetting<float> rearAcceleration("game@rearAccel", 600.f);
+		static jop::DynamicSetting<float> rotateTorgue("game@rotateTorgue", 21.f);
+		static jop::DynamicSetting<float> rotationFriction("game@rotationFriction", 1000.f);
+		static jop::DynamicSetting<float> linearFriction("game@linearFriction", 1000.f);
+		static jop::DynamicSetting<float> normalFriction("game@normalFriction", 1000.f);
 		static jop::DynamicSetting<float> driveControl("game@driveControl", 12.f);
-		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 4.f);
-		static jop::DynamicSetting<float> maxSpeed("game@maxSpeed", 18.f);
+		static jop::DynamicSetting<float> driveControlActivationSpeed("game@driveControlActivationSpeed", 5.f);
+		static jop::DynamicSetting<float> maxSpeed("game@maxSpeed", 40.f);
 		
 
 		float angleBetweenVeloAndDir = acos(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? carObj->getLinearVelocity() : glm::vec2(0, 1))));
@@ -131,11 +168,11 @@ public:
 			//rearPower
 			if (glm::length(carObj->getLinearVelocity()) < maxSpeed)
 			{
-				carObj->applyForce((rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+				carObj->applyForce((rearAcceleration.value /*+ accelBoost(*carObj)*/)*glm::normalize(driveDirection)*deltaTime,
 					glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
 				//frontPower
-				carObj->applyForce((rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
-					glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));
+				/*carObj->applyForce((rearAcceleration.value + accelBoost(*carObj))*glm::normalize(driveDirection)*deltaTime,
+					glm::vec2(carObj->getObject()->getLocalPosition() + glm::vec3(driveDirection, 0.f)));*/
 			}
 		}
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Down))
@@ -228,7 +265,7 @@ public:
 		}
 			
 
-		if (angleBetweenVeloAndDir>0)
+		if (angleBetweenVeloAndDir>0 && glm::length(carObj->getLinearVelocity()) > 0.1f)
 		{
 			carObj->applyForce(-sin(angleBetweenVeloAndDir)*sin(angleBetweenVeloAndDir)*normalFriction.value*glm::normalize(carObj->getLinearVelocity())*deltaTime,
 				glm::vec2(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f)));
@@ -258,6 +295,11 @@ public:
 					}
 				}
 			}
+		}
+		else if (!jop::Keyboard::isKeyDown(jop::Keyboard::Up) && !jop::Keyboard::isKeyDown(jop::Keyboard::Down))
+		{
+			carObj->setLinearVelocity(glm::vec2());
+			carObj->setAngularVelocity(0);
 		}
     }
 };
