@@ -82,19 +82,19 @@ public:
             m_listener.m_car = car;
 
             // Engine
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(0);
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/car_loop.wav")).setLoop(true).play().setID(0);
 
             // drift
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(1);
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/driftLoop.wav")).setLoop(true).play().setVolume(0.f).setID(1);
 
             // crash
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(2);
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/metalHit.wav")).setID(2);
 
             // pedestrian
             car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(3);
 
             // explosion
-            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("")).setID(4);
+            car->createComponent<SoundEffect>().setBuffer(rm::get<SoundBuffer>("audio/carHit.wav")).setID(4);
         }
 
 		MapGenerator map = MapGenerator(*this);
