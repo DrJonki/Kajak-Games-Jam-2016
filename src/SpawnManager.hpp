@@ -96,19 +96,19 @@ public:
 		{
 			o->move(glm::vec3(crashVector * deltaTime, 0.f)).rotate(0, 0, glm::pi<float>() * deltaTime);
 		}
-		if (hasCrashed && (m_timer += deltaTime) >= 1.f)
+		if (hasCrashed && (m_timer += deltaTime) >= 0.75f)
 		{
 			if (!animSprite)
 			{
                 getObject()->createComponent<LightSource>(renderer, LightSource::Type::Point).setAttenuation(10.f).setIntensity(LightSource::Intensity::Diffuse, Color::Orange * 10.f);
 
-				animSprite = &getObject()->createComponent<AnimatedSprite>(renderer).setAtlas(m_atlas).setAnimationRange(0, 14).setFrameTime(1 / 30.f);
+				animSprite = &getObject()->createComponent<AnimatedSprite>(renderer).setAtlas(m_atlas).setAnimationRange(0, 14).setFrameTime(1 / 20.f);
 				animSprite->play(1);
 				getObject()->setScale(0.05 - (m_type == Type::Pedestrian) * 0.03).setRotation(0, 0, 0);
 				m_player->getComponent<SoundEffect>(4)->playReset();
 			}
             auto l = getObject()->getComponent<LightSource>();
-            l->setAttenuation(100.f * (15 * (1.f / 30.f) - (m_timer - 1.f)));
+            l->setAttenuation(100.f * (15 * (1.f / 20.f) - (m_timer - 0.75f)));
 
 
 			if (getObject()->getComponent<AnimatedSprite>()->getCurrentFrame() == 14)
