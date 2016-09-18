@@ -30,12 +30,12 @@ namespace sc
             else if (o->hasTag("spawn_ped"))
             {
                 m_car->getComponent<SoundEffect>(3)->playReset();
-                o->removeSelf();
+				o->getComponent<Spawn>()->crash();
             }
             else if(o->hasTag("spawn_car"))
             {
                 m_car->getComponent<SoundEffect>(4)->playReset();
-                o->removeSelf();
+				o->getComponent<Spawn>()->crash();
             }
         }
 
