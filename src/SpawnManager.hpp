@@ -125,7 +125,7 @@ public:
 
     void update(const float deltaTime) override
     {
-    #if 1 // Auto-spawn
+    #if 0 // Auto-spawn
 
         if ((m_timer += deltaTime) >= 0.5f)
         {

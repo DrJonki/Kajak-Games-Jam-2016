@@ -10,16 +10,17 @@ private:
 	std::vector<std::vector<glm::vec2>> map;
 	glm::vec2 tile;
 	float tileSize = 10.f;
-	int mapSize = 80;
+	int mapSize = 40;
 	int minRoadRange = 4;
 	int maxRoadRange = 4;
+	std::vector<std::vector<bool>> tempVecVec;
+	std::vector<int> xRoads;
+	std::vector<int> yRoads;
 
 	std::vector<std::vector<int>> getRandomRoads()
 	{
 		using namespace jop;
 		std::vector<std::vector<int>> tempVec;
-		std::vector<int> xRoads;
-		std::vector<int> yRoads;
 
 		for (int i = 0; i < mapSize; i++)
 		{
@@ -141,10 +142,11 @@ private:
 							}
 						}
 					}
-					JOP_DEBUG_INFO("#### House " + std::to_string(houseCount));
-					JOP_DEBUG_INFO("Position X: " + std::to_string(j * tileSize) + " X tiles: " + std::to_string(tileCountX));
-					JOP_DEBUG_INFO("Position Y: " + std::to_string(i * tileSize) + " Y tiles: " + std::to_string(tileCountY));
-					JOP_DEBUG_INFO("################");
+
+					//JOP_DEBUG_INFO("#### House " + std::to_string(houseCount));
+					//JOP_DEBUG_INFO("Position X: " + std::to_string(j * tileSize) + " X tiles: " + std::to_string(tileCountX));
+					//JOP_DEBUG_INFO("Position Y: " + std::to_string(i * tileSize) + " Y tiles: " + std::to_string(tileCountY));
+					//JOP_DEBUG_INFO("################");
 
 					mapObjects->setPosition(housePosition.x + houseSize.x / 2, housePosition.y - houseSize.y / 2, -0.1f);
 					mapObjects->createComponent<RigidBody2D>(scene.getWorld<2>(), RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("house_", houseSize ), RigidBody::Type::Static, 1.f));
@@ -166,9 +168,9 @@ public:
 	{
 		auto roads = getRandomRoads();
 		glm::vec2 startPos = glm::vec2((-mapSize*tileSize) / 2, (mapSize*tileSize) / 2);
-		std::vector<std::vector<bool>> tempVecVec;
 		for (int i = 0; i < mapSize; i++) 
 		{
+			std::string mapString;
 			std::vector<bool> tempVec;
 			for (int j = 0; j < mapSize; j++)
 			{
@@ -192,16 +194,63 @@ public:
 				tempVec.push_back(tileStyle);
 			}
 			tempVecVec.push_back(tempVec);
-			std::string mapString;
+
 			for (int i = 0; i < tempVec.size(); i++)
 			{
-				mapString.append(std::to_string(tempVec[i]) + " ");
+				if (i != 0 )
+				{
+					mapString.append(std::to_string(tempVec[i]) + " ");
+				}
+
 			}
 			JOP_DEBUG_INFO(mapString);
 
 		}
-
+		bool spawnSet = false;
+		for (int i = 0; i < tempVecVec.size(); i++)
+		{
+			if (tempVecVec[i][i] && !spawnSet)
+			{
+				//JOP_DEBUG_INFO(i * tileSize);
+				scene.findChild("car")->setPosition(glm::vec3(i * tileSize + (tileSize * 2.5), i*tileSize - tileSize / 2 , 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+				spawnSet = true;
+			}
+		}
 		createHouses(tempVecVec, scene);
+	}
+
+	std::vector<int> getRandomYRoads()
+	{
+		std::vector<int> tempRoad;
+
+		for (int i = 0; i < yRoads.size(); i++)
+		{
+			tempRoad.push_back(yRoads[i] * tileSize - tileSize / 2);
+		}
+
+		return tempRoad;
+	}
+
+	std::vector<int> getRandomXRoads()
+	{
+		std::vector<int> tempRoad;
+
+		for (int i = 0; i < xRoads.size(); i++)
+		{
+			tempRoad.push_back(xRoads[i] * tileSize + (tileSize * 2.5));
+		}
+
+		return tempRoad;
+	}
+
+	float getTileSize()
+	{
+		return tileSize;
+	}
+
+	glm::vec2 getMapSize()
+	{
+		return glm::vec2(mapSize * tileSize);
 	}
 };
 

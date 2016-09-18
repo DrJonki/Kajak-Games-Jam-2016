@@ -10,10 +10,12 @@ class MyScene : public jop::Scene
 private:
 
     jop::WeakReference<jop::Object> m_object;
+	MapGenerator *map;
 
 public:
 	float steeringAngle = 0.0f;
 	bool isDrifting = false;
+	float m_timer;
     MyScene()
         : jop::Scene("MyScene"),
         m_object()
@@ -31,17 +33,16 @@ public:
 			setTexture(rm::get<Texture2D>("car.png"), false).
 			getObject()->createComponent<RigidBody2D>(getWorld<2>(),RigidBody2D::ConstructInfo2D(rm::getNamed<RectangleShape2D>("car", 1.f,2.f),RigidBody::Type::Dynamic,1.f));
 
-		MapGenerator map = MapGenerator(*this);
 		getWorld<2>().setGravity(glm::vec2());
 		getWorld<2>().setDebugMode(true);
-
 
 		// Debug camera mode
 		auto camSize = cam->getSize();
 		cam->setSize(camSize + glm::vec2(100, 100 / (camSize.x / camSize.y)));
 
-
-        createComponent<SpawnManager>(-cam->getSize(), cam->getSize());
+		map = new MapGenerator(*this);
+		JOP_DEBUG_INFO("Map size :" +  std::to_string(map->getMapSize().x));
+        createComponent<SpawnManager>(glm::vec2(20,-10), map->getMapSize());
         createChild("helo")->createComponent<Helo>(getRenderer(), static_ref_cast<const jop::Object>(findChild("car")));
 	}
 
@@ -59,7 +60,7 @@ public:
 	{
 		auto cam = findChild("cam")->getComponent<jop::Camera>();
 		auto camSize = cam->getSize();
-		if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
+		//if ((camSize.x < 100 && deltaZoom > 0) || (camSize.x > 5 && deltaZoom < 0))
 			cam->setSize(camSize + glm::vec2(deltaZoom, deltaZoom/(camSize.x/camSize.y)));
 	}
 
@@ -108,7 +109,6 @@ public:
 
 		float angleBetweenVeloAndDir = acos(glm::dot(glm::normalize(glm::length(driveDirection)>0 ? driveDirection : glm::vec2(0, 1)), glm::normalize(glm::length(carObj->getLinearVelocity())>0 ? carObj->getLinearVelocity() : glm::vec2(0, 1))));
 
-
 		float angularVelo = carObj->getAngularVelocity();
 		if (angularVelo > 0.04)
 		{
@@ -123,7 +123,7 @@ public:
 			carObj->setAngularVelocity(0);
 		}
 
-		JOP_DEBUG_DIAG(glm::length(carObj->getLinearVelocity()));
+		//JOP_DEBUG_DIAG(glm::length(carObj->getLinearVelocity()));
 
 		//findChild("debugDot")->setPosition(carObj->getObject()->getLocalPosition() - glm::vec3(driveDirection, 0.f));
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::Up))
@@ -178,6 +178,30 @@ public:
 		if (jop::Keyboard::isKeyDown(jop::Keyboard::KeypadSubtract))
 		{
 			zoomCamera(1.f);
+		}
+
+		if (jop::Keyboard::isKeyDown(jop::Keyboard::F))
+		{
+			JOP_DEBUG_INFO("Car pos: " + std::to_string(findChild("car")->getLocalPosition().x) + " : " + std::to_string(findChild("car")->getLocalPosition().y));
+		}
+
+		if ((m_timer += deltaTime) >= 0.5f)
+		{
+
+			int roadIndexY = rand() % map->getRandomYRoads().size();
+
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Right, map->getRandomYRoads()[roadIndexY] - map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Left, map->getRandomYRoads()[roadIndexY] + map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Right, map->getRandomYRoads()[roadIndexY] - map->getTileSize() / 3);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Left, map->getRandomYRoads()[roadIndexY] + map->getTileSize() / 3);
+
+			int roadIndexX = rand() % map->getRandomXRoads().size();
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Up, map->getRandomXRoads()[roadIndexX] - map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Car, Spawn::Dir::Down, map->getRandomXRoads()[roadIndexX] + map->getTileSize() / 6);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Up, map->getRandomXRoads()[roadIndexX] - map->getTileSize() / 3);
+			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Down, map->getRandomXRoads()[roadIndexX] + map->getTileSize() / 3);
+
+			m_timer -= 0.5f;
 		}
 
 
