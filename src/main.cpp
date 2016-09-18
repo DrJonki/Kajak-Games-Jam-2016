@@ -222,7 +222,7 @@ public:
 			JOP_DEBUG_INFO("Car pos: " + std::to_string(findChild("car")->getLocalPosition().x) + " : " + std::to_string(findChild("car")->getLocalPosition().y));
 		}
 
-		if ((m_timer += deltaTime) >= 0.5f)
+		if ((m_timer += deltaTime) >= 1.5f)
 		{
 
 			int roadIndexY = rand() % map->getRandomYRoads().size();
@@ -238,10 +238,29 @@ public:
 			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Up, map->getRandomXRoads()[roadIndexX] - map->getTileSize() / 3);
 			getComponent<SpawnManager>()->spawn(Spawn::Type::Pedestrian, Spawn::Dir::Down, map->getRandomXRoads()[roadIndexX] + map->getTileSize() / 3);
 
-			m_timer -= 0.5f;
+			m_timer -= 1.5f;
 		}
 
-
+		// x
+		if (findChild("car")->getLocalPosition().x <= 20)
+		{
+			findChild("car")->setPosition(glm::vec3(map->getMapSize().x - 30, findChild("car")->getLocalPosition().y, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		if (findChild("car")->getLocalPosition().x >= map->getMapSize().x)
+		{
+			findChild("car")->setPosition(glm::vec3(40, findChild("car")->getLocalPosition().y, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		
+		// y
+		if (findChild("car")->getLocalPosition().y <= -10)
+		{
+			findChild("car")->setPosition(glm::vec3(findChild("car")->getLocalPosition().x, map->getMapSize().y - 40, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		if (findChild("car")->getLocalPosition().y >= map->getMapSize().y -20)
+		{
+			findChild("car")->setPosition(glm::vec3(findChild("car")->getLocalPosition().x, 40, 0)).getComponent<jop::RigidBody2D>()->synchronizeTransform();
+		}
+		
 		// sliding makes car go slower
 
 		//slideAccelerator();
