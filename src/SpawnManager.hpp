@@ -33,6 +33,9 @@ private:
     const Dir m_dir;
     const glm::vec2 m_limBL;
     const glm::vec2 m_limTR;
+	AnimationAtlas &m_atlas;
+	Renderer &renderer;
+	bool hasCrashed;
 
 public:
 
@@ -41,7 +44,10 @@ public:
           m_type    (type),
           m_dir     (direction),
           m_limBL   (limbl),
-          m_limTR   (limtr)
+          m_limTR   (limtr),
+		  m_atlas	(ResourceManager::get<AnimationAtlas>("explosion.png", glm::uvec2(5, 3))),
+		  renderer  (rend),
+		  hasCrashed(false)
     {
         std::string name;
         if (type == Type::Pedestrian)
@@ -70,14 +76,28 @@ public:
         };
 
         auto o = getObject();
-        auto& pos = o->move(dirs[static_cast<int>(m_dir)] * deltaTime).getGlobalPosition();
+		if (!hasCrashed)
+		{
+			auto& pos = o->move(dirs[static_cast<int>(m_dir)] * deltaTime).getGlobalPosition();
 
-        if (pos.x <= m_limBL.x || pos.x >= m_limTR.x || pos.y <= m_limBL.y || pos.y >= m_limTR.y)
-        {
-            o->removeSelf();
-            return;
-        }
+			if (pos.x <= m_limBL.x || pos.x >= m_limTR.x || pos.y <= m_limBL.y || pos.y >= m_limTR.y)
+			{
+				o->removeSelf();
+				return;
+			}
+		}
+		if (hasCrashed && getObject()->getComponent<AnimatedSprite>()->getCurrentFrame() == 14)
+		{
+			o->removeSelf();
+		}
     }
+	void crash()
+	{
+		getObject()->setRotation(0, 0, 0).setScale(0.05);
+
+		getObject()->createComponent<AnimatedSprite>(renderer).setAtlas(m_atlas).setAnimationRange(0, 14).setFrameTime(1/30.f).play(1);
+		hasCrashed = true;
+	}
 };
 
 class SpawnManager : public Component
@@ -175,4 +195,5 @@ public:
 
         o->setPosition(startPositions[de]).setRotation(0.f, 0.f, startRotations[de]);
     }
+
 };
